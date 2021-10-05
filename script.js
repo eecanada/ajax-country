@@ -5,12 +5,14 @@ const countriesContainer = document.querySelector('.countries');
 
 ///////////////////////////////////////
 
+function renderError(msg) {
+  countriesContainer.insertAdjacentText('beforeend', msg);
+  countriesContainer.style.opacity = 1;
+}
+
 function renderCountry(data, className = '') {
-  console.log(data, 'data');
   const languages = Object.values(data.languages);
-  console.log(languages);
   const currencies = Object.values(data.currencies);
-  console.log(currencies);
 
   const html = `
   <article class="country ${className}">
@@ -28,15 +30,12 @@ function renderCountry(data, className = '') {
   `;
 
   countriesContainer.insertAdjacentHTML('beforeend', html);
-  countriesContainer.style.opacity = 1;
+  // countriesContainer.style.opacity = 1;
 }
 
 function renderNeighbor(data1, className = '') {
-  console.log(data1[0], 'dataaaaaa');
   const languages = Object.values(data1[0].languages);
-  console.log(languages);
   const currencies = Object.values(data1[0].currencies);
-  console.log(currencies);
 
   const html = `
   <article class="country ${className}">
@@ -54,26 +53,42 @@ function renderNeighbor(data1, className = '') {
   `;
 
   countriesContainer.insertAdjacentHTML('beforeend', html);
-  countriesContainer.style.opacity = 1;
+  // countriesContainer.style.opacity = 1;
+}
+
+function getJSON(url, errorMsg = 'Something went wrong') {
+  return fetch(url).then((response) => {
+    if (response.okay) throw new Error(`${errorMsg} ${response.status}`);
+    return response.json();
+  });
 }
 
 function getCountryData(country) {
   //country 1
-  fetch(`https://restcountries.com/v3.1/name/${country}`)
-    .then((response) => response.json())
+  getJSON(
+    `https://restcountries.com/v3.1/name/${country}
+  `,
+    'Country not found'
+  )
     .then((data) => {
       renderCountry(data[0]);
       const neighbor = data[0].borders[0];
 
-      if (!neighbor) return;
+      if (!neighbor) throw new Error('No neighbor found');
 
       //country 2
-      return fetch(`https://restcountries.com/v3.1/alpha/${neighbor}`);
+      return getJSON(`https://restcountries.com/v3.1/alpha/${neighbor}`);
     })
-    .then((response) =>
-      response.json().then((data1) => renderNeighbor(data1, 'neighbour'))
-    );
+    .then((data1) => renderNeighbor(data1, 'neighbour'))
+
+    .catch((err) => {
+      renderError(`Something went wrong 💣 ${err.message}. Try again!`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
+    });
 }
 
-getCountryData('usa');
-// getCountryAndNeighbor('usa');
+btn.addEventListener('click', function () {
+  getCountryData('usa');
+});
