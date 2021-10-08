@@ -25,7 +25,7 @@
 
 [Click to visit page](https://ajax-country.netlify.app/)
 
-* The users click on the "Where am I?" and depending on their location, the app will load which country they are currently located in.
+* The user clicks on the "Where am I?" and depending on their location, the app will load which country they are currently located in.
 
 * The app will provide information of their current location along with a neighboring country if they do have one.
 
