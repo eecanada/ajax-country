@@ -89,6 +89,34 @@ function getCountryData(country) {
     });
 }
 
+function whereAmI() {
+  getPosition()
+    .then((location) => {
+      const { latitude: lat, longitude: lng } = location.coords;
+
+      return fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+    })
+    .then((response) => {
+      if (!response.ok)
+        throw new Error(
+          `Please go easy on the request, limit of 3 per second: ${response.status}`
+        );
+      return response.json();
+    })
+    .then((data) => {
+      getCountryData(`${data.country}`);
+      console.log(data);
+      console.log(`Your are in ${data.city} ${data.country}`);
+    })
+    .catch((err) => console.error(err.message + ' 🧨'));
+}
+
 btn.addEventListener('click', function () {
-  getCountryData('usa');
+  whereAmI();
 });
+
+function getPosition() {
+  return new Promise(function (resolve, reject) {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+}
